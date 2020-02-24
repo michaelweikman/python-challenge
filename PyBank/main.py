@@ -3,21 +3,22 @@ import csv
 
 def main(csvpath):
     results = get_analysis_data(csvpath)
-    print_data(results)
+    data_string = get_output_str(results)
+    print_data(data_string)
 
 def get_analysis_data(csvpath):
     with open(csvpath) as csvfile:
         csvreader = csv.reader(csvfile)
 
-        # I'm sure there is a way to iterate pass this but I found this easier
-        csv_header = next(csvreader)
+        #Skip header
+        next(csvreader)
 
         #Grabbing first row (month) to initiate variables
         csv_first_row = next(csvreader)        
         prev_val = int(csv_first_row[1])
         change_list = {}
         count = 1
-        sum_value = prev_val
+        total = prev_val
         sum_change = 0
 
         for row in csvreader:
@@ -26,7 +27,7 @@ def get_analysis_data(csvpath):
 
             change_list[row[0]] = change
             sum_change = sum_change + change
-            sum_value = sum_value + cur_val
+            total = total + cur_val
 
             prev_val = cur_val
             count = count + 1
@@ -36,14 +37,14 @@ def get_analysis_data(csvpath):
     return [
         change_list,
         count,
-        sum_value,
+        total,
         avg_change
     ]
 
-def print_data(results):
+def get_output_str(results):
     change_list = results[0]
     count = results[1]
-    sum_value = results[2]
+    total = results[2]
     avg_change = results[3]
 
     #max and min on dictionary return dict key. In order to get value I have to use .get(key)
@@ -52,14 +53,23 @@ def print_data(results):
     max_change_value = change_list.get(max_change_date)
     min_change_value = change_list.get(min_change_date)
 
-    print("Financial Analysis")
-    print("----------------------------")
-    print(f"Total Months: {count}")
-    print(f"Total: ${sum_value}")
-    print(f"Average Change: ${avg_change:.2f}")
-    print(f"Greatest Increase in Profits: {max_change_date} (${max_change_value})")
-    print(f"Greatest Decrease in Profits: {min_change_date} (${min_change_value})")
-    return
+    ouput_str = "Financial Analysis \n" \
+        "----------------------------\n" \
+        f"Total Months: {count}\n" \
+        f"Total: ${total}\n" \
+        f"Average Change: ${avg_change:.2f}\n" \
+        f"Greatest Increase in Profits: {max_change_date} (${max_change_value})\n" \
+        f"Greatest Decrease in Profits: {min_change_date} (${min_change_value})\n" \
+
+    return ouput_str
+
+def print_data(string):
+    #open file
+    filePath = os.path.join(os.path.dirname(__file__), "results.txt")
+    file = open(filePath, "w")
+
+    print(string)
+    file.write(string)
 
 if __name__ == "__main__":
     #Using __file__ variable to get .py path
